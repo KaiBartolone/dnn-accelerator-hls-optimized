@@ -23,7 +23,17 @@ void run(ac_channel<Params> &paramsIn,
         // Generate the loop indices here for the systolic array.
         // Write the loop indices as well as the params out to channels.
         // Your code starts here
-
+        Params params = paramsIn.read();
+        for (int oy1_ox1_oc1 = 0; oy1_ox1_oc1 < params.OY1 * params.OX1 * params.OC1; oy1_ox1_oc1++) {
+            for (int ic1 = 0; ic1 < params.IC1; ic1++) {
+                for (int fy = 0; fy < params.FY; fy++) {
+                    for (int fx = 0; fx < params.FX; fx++) {
+                        loopIndicesOut.write((LoopIndices){ic1, fx, fy});
+                        paramsOut.write(params);
+                    }
+                }
+            }
+        }
         // Your code ends here
         // -------------------------------
     }

@@ -18,7 +18,12 @@ go assembly
 # -------------------------------
 # Set the correct word widths and the stage replication
 # Your code starts here
-
+directive set /InputDoubleBuffer<4096,16,16>/InputDoubleBufferReader<4096,16,16>/din -WORD_WIDTH 128
+directive set /InputDoubleBuffer<4096,16,16>/InputDoubleBufferWriter<4096,16,16>/dout -WORD_WIDTH 128
+directive set /InputDoubleBuffer<4096,16,16>/mem -WORD_WIDTH 128
+directive set /InputDoubleBuffer<4096,16,16>/mem:cns -STAGE_REPLICATION 2
+directive set /InputDoubleBuffer<4096,16,16>/InputDoubleBufferReader<4096,16,16>/run/tmp.data.value -WORD_WIDTH 128
+directive set /InputDoubleBuffer<4096,16,16>/InputDoubleBufferWriter<4096,16,16>/run/tmp.data.value -WORD_WIDTH 128
 # Your code ends here
 # -------------------------------
 

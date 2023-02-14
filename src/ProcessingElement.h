@@ -19,7 +19,8 @@ public:
         // -------------------------------
         // Perform the MAC operation and forward inputs
         // Your code starts here
-
+        input_out = input_in;
+        psum_out = input_in * weight + psum_in;
         // Your code ends here
         // -------------------------------
     }
