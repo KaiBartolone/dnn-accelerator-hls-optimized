@@ -2,6 +2,8 @@
 #define INPUT_DOUBLE_BUFFER_H
 
 
+typedef ac_int<ac::nbits<INPUT_BUFFER_SIZE>::val, false> ibuf_t;
+
 template <int size, int IC0, int OC0>
 class InputDoubleBufferWriter{
 public:
@@ -14,16 +16,22 @@ public:
     {
         // -------------------------------
         // Your code starts here
+        
+        #ifndef __SYNTHESIS__
+        while(paramsIn.available(1))
+        #endif
+        {
         Params params = paramsIn.read();
-        int IX0 = (params.OX0 - 1) * params.STRIDE + params.FX;
-        int IY0 = (params.OY0 - 1) * params.STRIDE + params.FY;
-        int ifmap_max_wadr_c = (int)params.IC1 * IX0 * IY0;
+
+        ibuf_t IX0 = (params.OX0 - 1) * params.STRIDE + params.FX;
+        ibuf_t IY0 = (params.OY0 - 1) * params.STRIDE + params.FY;
+        
+        ibuf_t ifmap_max_wadr_c = params.IC1 * IX0 * IY0;
         chanStruct<PackedInt<INPUT_PRECISION,IC0>,size> tmp;
-        for (int oy1_ox1 = 0; oy1_ox1 < params.OY1 * params.OX1; oy1_ox1++) {
-            for (int ifmap_wadr = 0; ifmap_wadr < ifmap_max_wadr_c; ifmap_wadr++) {
-                for (int i = 0; i < IC0; i += 4) {
+            for (ibuf_t ifmap_wadr = 0; ifmap_wadr < ifmap_max_wadr_c; ifmap_wadr++) {
+                for (ibuf_t i = 0; i < IC0; i += 4) {
                     PackedInt<INPUT_PRECISION,4> packedInt = din.read();
-                    for (int j = 0; j < 4; j++) {
+                    for (ibuf_t j = 0; j < 4; j++) {
                         tmp.data[ifmap_wadr].value[i+j] = packedInt.value[j];
                     }
                 }
@@ -47,20 +55,26 @@ public:
     {
         // -------------------------------
         // Your code starts here
+        
+        #ifndef __SYNTHESIS__
+        while(paramsIn.available(1))
+        #endif
+        {
         Params params = paramsIn.read();
-        int IX0 = (params.OX0 - 1) * params.STRIDE + params.FX;
-        int IY0 = (params.OY0 - 1) * params.STRIDE + params.FY;
+
+        ibuf_t IX0 = (params.OX0 - 1) * params.STRIDE + params.FX;
+        ibuf_t IY0 = (params.OY0 - 1) * params.STRIDE + params.FY;
+
         chanStruct<PackedInt<INPUT_PRECISION,IC0>,size> tmp;
-        for (int oy1_ox1 = 0; oy1_ox1 < params.OY1 * params.OX1; oy1_ox1++) {
             tmp = din.read();
-            for (int oc1 = 0; oc1 < params.OC1; oc1++) {
-                for (int ic1 = 0; ic1 < params.IC1; ic1 ++) {
-                    for (int fy = 0; fy < params.FY; fy++) {
-                        for (int fx = 0; fx < params.FX; fx++) {
-                            for (int oy0 = 0; oy0 < params.OY0; oy0++) {
-                                for (int ox0 = 0; ox0 < params.OX0; ox0++) {
-                                    int ix0 = ox0 * params.STRIDE + fx;
-                                    int iy0 = oy0 * params.STRIDE + fy;
+            for (ibuf_t oc1 = 0; oc1 < params.OC1; oc1++) {
+                for (ibuf_t ic1 = 0; ic1 < params.IC1; ic1 ++) {
+                    for (ibuf_t fy = 0; fy < params.FY; fy++) {
+                        for (ibuf_t fx = 0; fx < params.FX; fx++) {
+                            for (ibuf_t oy0 = 0; oy0 < params.OY0; oy0++) {
+                                for (ibuf_t ox0 = 0; ox0 < params.OX0; ox0++) {
+                                    ibuf_t ix0 = ox0 * params.STRIDE + fx;
+                                    ibuf_t iy0 = oy0 * params.STRIDE + fy;
                                     dout.write(tmp.data[ic1 * IX0 * IY0 + iy0 * IX0 + ix0]);
                                 }
                             }
@@ -87,8 +101,10 @@ public:
 
         Params params = paramsIn.read();
 
-        inputDoubleBufferReaderParams.write(params);
-        inputDoubleBufferWriterParams.write(params);
+        for (ibuf_t oy1_ox1 = 0; oy1_ox1 < params.OY1 * params.OX1; oy1_ox1++) {
+            inputDoubleBufferReaderParams.write(params);
+            inputDoubleBufferWriterParams.write(params);
+        }
 
         inputDoubleBufferWriter.run(inputDoubleBufferWriterParams, inputs_in, mem);
 

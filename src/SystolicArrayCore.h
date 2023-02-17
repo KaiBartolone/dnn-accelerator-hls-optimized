@@ -169,7 +169,9 @@ public:
                 // Run the 16x16 PE array
                 // Make sure that the correct registers are given to the PE
                 // Your code starts here
+                #pragma unroll yes
                 for (int x = 0; x < OC0; x++) {
+                    #pragma unroll yes
                     for (int y = 0; y < IC0; y++) {
                         pe_array[x][y].run(input_reg_in[x][y], psum_reg_in[x][y], weight_reg[x][y], input_reg_out[x][y], psum_reg_out[x][y]);
                     }
